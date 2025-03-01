@@ -1,0 +1,45 @@
+services:
+  namenode:
+    image: cjj2010/hadoop:3.3.6
+    ports: 
+        - "9870:9870"
+        - "8088:8088"
+    volumes:
+        - ./jobs:/tmp/jobs
+        # Named volume for the NameNode data
+        - namenode-data:/data/dfs/name
+        # Named volume for the Secondary NameNode checkpoint directory
+        - namesecondary-data:/data/dfs/namesecondary
+    command: > 
+      bash -c "hdfs namenode & yarn resourcemanager "
+    hostname: hdfs-namenode
+
+  datanode:
+    image: cjj2010/hadoop:3.3.6
+    hostname: datanode
+    depends_on: 
+        - namenode
+    command: >
+      bash -c "hdfs datanode & yarn nodemanager "
+    ports:
+# The host port is randomly assigned by Docker, to allow scaling to multiple DataNodes on the same host
+      - "9864"
+    volumes:
+      # Named volume for the DataNode data
+      - datanode-data:/data/dfs/data
+    links:
+        - namenode:hdfs-namenode
+
+
+  secondarynamenode:
+    image: cjj2010/hadoop:3.3.6
+    command: hdfs secondarynamenode
+    ports:
+        - "9868:9868"
+    links:
+        - namenode:hdfs-namenode
+
+volumes:
+  namenode-data:
+  namesecondary-data:
+  datanode-data:

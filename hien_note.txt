@@ -1,0 +1,73 @@
+
+docker cp cust.txt 336-namenode-1:/tmp/
+docker cp trans.txt 336-namenode-1:/tmp/
+
+docker exec -it 336-namenode-1 bash
+hdfs dfs -mkdir -p /user/hien2706/input
+
+hdfs dfs -put /tmp/cust.txt /user/hien2706/input/
+hdfs dfs -put /tmp/trans.txt /user/hien2706/input/
+
+hdfs dfs -ls /user/hien2706/input/
+
+
+cd jobs/
+
+docker exec -it 336-namenode-1 bash
+cd /tmp/jobs
+
+javac -classpath "$(hadoop classpath)" TransAnalysis1.java 
+jar cf transanalysis1.jar TransAnalysis1*.class
+
+javac -classpath "$(hadoop classpath)" TransAnalysis2.java 
+jar cf transanalysis2.jar TransAnalysis2*.class
+
+javac -classpath "$(hadoop classpath)" TransAnalysis3.java 
+jar cf transanalysis3.jar TransAnalysis3*.class
+
+javac -classpath "$(hadoop classpath)" TransAnalysis4.java 
+jar cf transanalysis4.jar TransAnalysis4*.class
+
+javac -classpath "$(hadoop classpath)" TransAnalysis5.java 
+jar cf transanalysis5.jar TransAnalysis5*.class
+
+javac -classpath "$(hadoop classpath)" TransAnalysis6.java 
+jar cf transanalysis6.jar TransAnalysis6*.class
+
+
+hdfs dfs -rm -r /user/hien2706/output1
+hdfs dfs -rm -r /user/hien2706/output2
+hdfs dfs -rm -r /user/hien2706/output3
+hdfs dfs -rm -r /user/hien2706/output4
+hdfs dfs -rm -r /user/hien2706/output5
+hdfs dfs -rm -r /user/hien2706/output6
+
+
+
+hadoop jar /tmp/jobs/transanalysis1.jar TransAnalysis1 /user/hien2706/input/trans.txt /user/hien2706/output1
+hadoop jar /tmp/jobs/transanalysis2.jar TransAnalysis2 /user/hien2706/input/trans.txt /user/hien2706/output2
+hadoop jar /tmp/jobs/transanalysis3.jar TransAnalysis3 /user/hien2706/input/trans.txt /user/hien2706/output3
+hadoop jar /tmp/jobs/transanalysis4.jar TransAnalysis4 /user/hien2706/input/trans.txt /user/hien2706/output4
+hadoop jar /tmp/jobs/transanalysis5.jar TransAnalysis5 /user/hien2706/input/trans.txt /user/hien2706/output5
+hadoop jar /tmp/jobs/transanalysis6.jar TransAnalysis6 /user/hien2706/input/trans.txt /user/hien2706/output6
+
+hdfs dfs -ls /user/hien2706/output
+
+hdfs dfs -cat /user/hien2706/output1/part*
+hdfs dfs -cat /user/hien2706/output2/part*
+hdfs dfs -cat /user/hien2706/output3/part*
+hdfs dfs -cat /user/hien2706/output4/part*
+hdfs dfs -cat /user/hien2706/output5/part*
+hdfs dfs -cat /user/hien2706/output6/part*
+
+
+./run_jobs.sh all 2>&1 | tee log.log
+nohup ./run_jobs.sh all > log.log 2>&1 &
+
+
+
+
+
+
+
+
